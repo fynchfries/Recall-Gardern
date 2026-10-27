@@ -386,10 +386,10 @@ class Handler(BaseHTTPRequestHandler):
         try:
             if parsed.path.startswith("/api/"):
                 self._api(method, parsed.path, parse_qs(parsed.query))
-            elif method == "GET" and parsed.path in ("/", "/index.html", "/app.js", "/styles.css"):
+            elif method == "GET" and parsed.path in ("/", "/index.html", "/app.js", "/local-store.js", "/styles.css"):
                 filename = "index.html" if parsed.path in ("/", "/index.html") else parsed.path[1:]
                 types = {"index.html": "text/html; charset=utf-8", "app.js": "text/javascript; charset=utf-8",
-                         "styles.css": "text/css; charset=utf-8"}
+                         "local-store.js": "text/javascript; charset=utf-8", "styles.css": "text/css; charset=utf-8"}
                 self._send(200, (BASE_DIR / "static" / filename).read_bytes(), types[filename])
             else:
                 self._send(404, {"error": "Not found."})

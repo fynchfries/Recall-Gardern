@@ -21,6 +21,10 @@ function escapeHtml(value) {
 }
 
 async function api(path, options = {}) {
+  const localHosts = new Set(["localhost", "127.0.0.1", "::1"]);
+  if (!localHosts.has(window.location.hostname)) {
+    return window.RecallGardenLocalStore.request(path, options);
+  }
   const response = await fetch(path, {
     ...options,
     headers: { "Content-Type": "application/json", ...(options.headers || {}) },
@@ -93,7 +97,7 @@ function renderHome() {
     <div class="study-banner"><div class="banner-copy"><h2>${due ? `${due} ${due === 1 ? "little reminder" : "little reminders"} are waiting.` : "Your garden is flourishing."}</h2><p>${due ? "A few minutes now can make a big difference later." : "Nothing is due right now. Come back when you're ready."}</p></div><button class="button banner-action" data-action="study" ${due ? "" : "disabled"}>${due ? "Start a study session  →" : "All caught up  ✓"}</button></div>
     <div class="section-heading"><h2>Your decks</h2><button class="text-button" data-action="new-deck">＋ Create a deck</button></div>
     <div class="deck-grid">${deckTiles}</div>
-    <p class="footer-note">Recall Garden uses a gentle spaced-repetition schedule. Everything is saved locally in your browser's companion database.</p>`;
+    <p class="footer-note">Recall Garden uses a gentle spaced-repetition schedule. Your study data stays in this device's local storage.</p>`;
 }
 
 async function renderCards(deckId = null) {
@@ -248,7 +252,7 @@ function renderDeckModal() {
 }
 
 function renderBackupModal() {
-  $("#modal-root").innerHTML = `<div class="modal-backdrop" id="modal-backdrop"><div class="modal"><h2>Your data, your choice.</h2><p>Download a JSON backup of all your decks and flashcards, or restore a backup on this device. Your data never leaves your computer.</p><div class="modal-actions" style="justify-content:space-between"><button type="button" class="button ghost" data-action="close-modal">Close</button><div class="form-actions-right"><button class="button secondary" data-action="import">Import backup</button><button class="button" data-action="download">Download backup</button></div></div></div></div>`;
+  $("#modal-root").innerHTML = `<div class="modal-backdrop" id="modal-backdrop"><div class="modal"><h2>Your data, your choice.</h2><p>Download a JSON backup of all your decks and flashcards, or restore a backup on this device. Your study data stays in this browser and isn't synced between devices.</p><div class="modal-actions" style="justify-content:space-between"><button type="button" class="button ghost" data-action="close-modal">Close</button><div class="form-actions-right"><button class="button secondary" data-action="import">Import backup</button><button class="button" data-action="download">Download backup</button></div></div></div></div>`;
 }
 
 async function downloadBackup() {
@@ -369,7 +373,7 @@ async function init() {
   $("#date-label").textContent = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(new Date());
   try { await refreshData(); renderHome(); }
   catch (error) {
-    content.innerHTML = `<div class="empty-panel"><div class="empty-illustration">!</div><h2>Couldn't connect to your garden</h2><p>${escapeHtml(error.message)} Make sure the Recall Garden server is running, then refresh the page.</p></div>`;
+    content.innerHTML = `<div class="empty-panel"><div class="empty-illustration">!</div><h2>Couldn't open your garden</h2><p>${escapeHtml(error.message)} Try refreshing the page. If this continues, restore a JSON backup or check your browser storage settings.</p></div>`;
   }
 }
 init();

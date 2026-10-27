@@ -1,6 +1,6 @@
 # Recall Garden
 
-Recall Garden is a private, local-first flashcard app for learning things you want to remember. Make decks, add question-and-answer cards, and review them with a spaced-repetition schedule that brings difficult material back sooner. It runs in a browser but stores your study data in a local SQLite database—no account, cloud service, or third-party Python packages required.
+Recall Garden is a private, local-first flashcard app for learning things you want to remember. Make decks, add question-and-answer cards, and review them with a spaced-repetition schedule that brings difficult material back sooner. When run with Python, study data is stored in a local SQLite database. On a static deployment such as Vercel, it is stored in that browser's local storage. Neither mode requires an account or a cloud database.
 
 ## Run it
 
@@ -24,6 +24,16 @@ HOST=0.0.0.0 python3 app.py
 
 Then open the **Ports** tab in VS Code, find port **8000**, and choose **Open in Browser**. Keep the forwarded port private; the app does not have user accounts or authentication. If port 8000 is already in use, run `HOST=0.0.0.0 PORT=8001 python3 app.py` and open port 8001 instead.
 
+## Deploy to Vercel
+
+The Vercel deployment serves the static browser app; it does not run the Python server. Study data is saved in the current browser's local storage, stays on that device, and is not shared or synced across browsers. Export regular JSON backups before clearing browser data or switching devices.
+
+1. In Vercel, choose **Add New → Project** and import this GitHub repository.
+2. Use the repository root as the project root. `vercel.json` sets the framework to **Other** and the output directory to `static`.
+3. Leave the build command empty and deploy.
+
+After deployment, each browser gets its own private set of decks. The local Python version continues to use SQLite as described above.
+
 ## What you can do
 
 - Create and organize decks of flashcards.
@@ -46,6 +56,8 @@ This is a deliberately understandable, lightweight scheduler rather than a claim
 - `static/index.html` — app shell and accessible page structure.
 - `static/styles.css` — responsive visual design.
 - `static/app.js` — browser interface and interactions.
+- `static/local-store.js` — browser-local data store used by static deployments.
+- `vercel.json` — static deployment configuration for Vercel.
 - `tests/test_app.py` — tests for persistence, validation, scheduling, and backup behavior.
 
 The data layer (`StudyStore`) is separate from the HTTP handler, which makes the core functionality testable without running a browser or server.
@@ -58,4 +70,4 @@ python3 -m unittest discover -s tests -v
 
 ## Privacy
 
-The server only listens on your own computer. Study content is stored in `recall.db`, and backup files are created only when you request them. The app has no analytics, tracking, sign-in, or external service dependencies. Keep your database and backups private if the material is sensitive.
+The local Python server only listens on your own computer, and its study content is stored in `recall.db`. Static deployments save study content in the current browser's local storage; it is not uploaded or synced. Backup files are created only when you request them. Keep your database and backups private if the material is sensitive.
